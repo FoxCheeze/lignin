@@ -6,27 +6,27 @@ from os.path import isdir
 from PIL import Image
 from PIL.Image import Image as Pilimage
 
-@click.command(name="split")
+
+@click.group()
+def main():
+    pass
+    
+    
+@main.command()
 @click.argument("files", nargs=-1, type=click.Path(exists=True))
 @click.option("--order", default="L-R")
 @click.option("-o", "--output", default="")
 @click.option("--pindex", default="1")
 @click.option("--zalign", default="3")
-def split(files, order, output, pindex, zalign):
+def vsplit(files, order, output, pindex, zalign, write_files=True):
+    if len(files) == 1 and isdir(files[0]):
+        files = convert_files(files)
+
     page_count: int = int(pindex)
 
     order = get_order(order)
     zalign = int(zalign)
 
-    if len(files) == 1 and isdir(files[0]):
-        dir_files = scandir(files[0])
-
-        files = []
-        for file in dir_files:
-            files.append(file.path)
-
-        files.sort()
-    
     pages: list[dict] = []
     for image_path in files:
         print(f"spliting `{image_path}`")
@@ -34,7 +34,7 @@ def split(files, order, output, pindex, zalign):
 
         with Image.open(image_path) as img:
             img = img.crop((150, 0, img.width - 150, img.height))
-            splited_pages: dict = split_image(img)
+            splited_pages: dict = vsplit_image(img)
 
         for i in range(len(splited_pages)):
             page_name: str = output + str(page_count).zfill(zalign) + extension
@@ -46,6 +46,11 @@ def split(files, order, output, pindex, zalign):
             pages.append(page)
             page_count += 1
 
+    if write_files:
+        save_page_list(pages)
+
+    return pages
+
 
 def save_page_list(pages: list[dict]):
     for page in pages:
@@ -53,7 +58,7 @@ def save_page_list(pages: list[dict]):
         page["File"].save(page["Name"])
 
 
-def split_image(img: Pilimage) -> dict[str, Pilimage]:
+def vsplit_image(img: Pilimage) -> dict[str, Pilimage]:
     pages: dict = {}
 
     pages["Left"] = img.crop((0, 0, img.width // 2, img.height))
@@ -71,6 +76,18 @@ def get_order(symbol: str) -> list[str]:
     return order
 
 
+def convert_files(files: list) -> list:
+    dir_files = scandir(files[0])
+
+    files = []
+    for file in dir_files:
+        files.append(file.path)
+
+    files.sort()
+
+    return files
+    
+
 if __name__ == "__main__":
-    split()
+    main()
     
