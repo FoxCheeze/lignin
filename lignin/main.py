@@ -1,12 +1,12 @@
 import click
 
+from pathlib import Path
 from os import scandir
 from os.path import isdir
-from pathlib import Path
 from PIL import Image
 from PIL.Image import Image as Pilimage
 
-@click.command()
+@click.command(name="split")
 @click.argument("files", nargs=-1, type=click.Path(exists=True))
 @click.option("--order", default="L-R")
 @click.option("-o", "--output", default="")
@@ -27,25 +27,30 @@ def split(files, order, output, pindex, zalign):
 
         files.sort()
     
+    pages: list[dict] = []
     for image_path in files:
         print(f"spliting `{image_path}`")
         extension: str = Path(image_path).suffix
 
         with Image.open(image_path) as img:
             img = img.crop((150, 0, img.width - 150, img.height))
-            pages: dict = split_image(img)
+            splited_pages: dict = split_image(img)
 
-        page_name: str = output + str(page_count).zfill(zalign) + extension
-        page_count += 1
-        pages[order[0]].save(page_name)
-        print(f"created `{page_name}` from {order[0]} half")
+        for i in range(len(splited_pages)):
+            page_name: str = output + str(page_count).zfill(zalign) + extension
+            page: dict = {
+                "File": splited_pages[order[i]],
+                "Name": page_name,
+                "Origin": f"{image_path} -- {order[i]}"
+            }
+            pages.append(page)
+            page_count += 1
 
-        page_name: str = output + str(page_count).zfill(zalign) + extension
-        pages[order[1]].save(page_name)
-        print(f"created `{page_name}` from {order[1]} half")
-        page_count += 1
 
-        print()
+def save_page_list(pages: list[dict]):
+    for page in pages:
+        print(f"saving {page['Name']}, from {page['Origin']}")
+        page["File"].save(page["Name"])
 
 
 def split_image(img: Pilimage) -> dict[str, Pilimage]:
