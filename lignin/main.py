@@ -10,14 +10,14 @@ from PIL.Image import Image as Pilimage
 @click.group()
 def main():
     pass
-    
-    
+
+
 @main.command()
-@click.argument("files", nargs=-1, type=click.Path(exists=True))
-@click.option("--order", default="L-R")
-@click.option("-o", "--output", default="")
-@click.option("--pindex", default="1")
-@click.option("--zalign", default="3")
+@click.argument('files', nargs=-1, type=click.Path(exists=True))
+@click.option('--order', default='L-R')
+@click.option('-o', '--output', default='')
+@click.option('--pindex', default='1')
+@click.option('--zalign', default='3')
 def vsplit(files, order, output, pindex, zalign, write_files=True):
     if len(files) == 1 and isdir(files[0]):
         files = convert_files(files)
@@ -29,7 +29,7 @@ def vsplit(files, order, output, pindex, zalign, write_files=True):
 
     pages: list[dict] = []
     for image_path in files:
-        print(f"spliting `{image_path}`")
+        print(f'spliting `{image_path}`')
         extension: str = Path(image_path).suffix
 
         with Image.open(image_path) as img:
@@ -39,9 +39,9 @@ def vsplit(files, order, output, pindex, zalign, write_files=True):
         for i in range(len(splited_pages)):
             page_name: str = output + str(page_count).zfill(zalign) + extension
             page: dict = {
-                "File": splited_pages[order[i]],
-                "Name": page_name,
-                "Origin": f"{image_path} -- {order[i]}"
+                'File': splited_pages[order[i]],
+                'Name': page_name,
+                'Origin': f'{image_path} -- {order[i]}',
             }
             pages.append(page)
             page_count += 1
@@ -55,23 +55,23 @@ def vsplit(files, order, output, pindex, zalign, write_files=True):
 def save_page_list(pages: list[dict]):
     for page in pages:
         print(f"saving {page['Name']}, from {page['Origin']}")
-        page["File"].save(page["Name"])
+        page['File'].save(page['Name'])
 
 
 def vsplit_image(img: Pilimage) -> dict[str, Pilimage]:
     pages: dict = {}
 
-    pages["Left"] = img.crop((0, 0, img.width // 2, img.height))
-    pages["Right"] = img.crop((img.width // 2, 0, img.width, img.height))
+    pages['Left'] = img.crop((0, 0, img.width // 2, img.height))
+    pages['Right'] = img.crop((img.width // 2, 0, img.width, img.height))
 
     return pages
-    
+
 
 def get_order(symbol: str) -> list[str]:
-    symbol = symbol.replace("L", "Left")
-    symbol = symbol.replace("R", "Right")
+    symbol = symbol.replace('L', 'Left')
+    symbol = symbol.replace('R', 'Right')
 
-    order: list = symbol.split("-")
+    order: list = symbol.split('-')
 
     return order
 
@@ -86,8 +86,7 @@ def convert_files(files: list) -> list:
     files.sort()
 
     return files
-    
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main()
-    
