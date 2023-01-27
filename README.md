@@ -1,7 +1,7 @@
 # Lignin
 #### Description:
-**lignin** is a program that gets an image as input and output this image split in two files
-with half of it each. This program was made for Harvard CS50p's final project.
+**lignin** is a program that takes an image as input, and output the image split in two files
+with half of it each.
 
 **lignin** was created with the intention to help automatize page splitting after scanning a book
 with a printer or scanner.
